@@ -149,6 +149,7 @@
 
   html {
     font-size: var(--font-size);
+    color-scheme: dark;
   }
 
   h1,
@@ -202,6 +203,15 @@
     font-size: var(--text-base);
     font-weight: var(--font-weight-normal);
     line-height: 1.5;
+  }
+
+  select {
+    color-scheme: dark;
+  }
+
+  select option {
+    background-color: #0f172a;
+    color: #f8fafc;
   }
 
   /* Smooth scrolling */
