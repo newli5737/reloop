@@ -1,0 +1,136 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum ListingStatus {
+  PENDING
+  ACTIVE
+  SOLD
+  REJECTED
+}
+
+enum Condition {
+  NEW
+  GOOD
+  FAIR
+  POOR
+}
+
+enum VerificationStatus {
+  NONE
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+model User {
+  id                   String             @id @default(cuid())
+  email                String             @unique
+  password             String
+  name                 String
+  phone                String?
+  avatar               String?
+  address              String?
+  dateOfBirth          String?
+  gender               String?
+  bio                  String?
+  role                 Role               @default(USER)
+  isActive             Boolean            @default(true)
+  verificationStatus   VerificationStatus @default(NONE)
+  cccdNumber           String?
+  cccdFullName         String?
+  cccdDateOfBirth      String?
+  cccdGender           String?
+  cccdNationality      String?
+  cccdPlaceOfOrigin    String?
+  cccdPlaceOfResidence String?
+  cccdIssueDate        String?
+  cccdExpiryDate       String?
+  cccdFrontImage       String?
+  cccdBackImage        String?
+  verificationNote     String?
+  verifiedAt           DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  listings             Listing[]
+  comments             Comment[]
+  sentMessages         Message[]
+  conversations        Conversation[]     @relation("BuyerConversations")
+  sellerChats          Conversation[]     @relation("SellerConversations")
+}
+
+model Listing {
+  id            String         @id @default(cuid())
+  title         String
+  description   String
+  price         Int
+  originalPrice Int?
+  category      String
+  condition     Condition
+  location      String
+  images        String[]
+  status        ListingStatus  @default(PENDING)
+  views         Int            @default(0)
+  userId        String
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  comments      Comment[]
+  conversations Conversation[]
+
+  @@index([status])
+  @@index([category])
+  @@index([userId])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  listingId String
+  userId    String
+  listing   Listing  @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@index([listingId])
+}
+
+model Conversation {
+  id        String    @id @default(cuid())
+  listingId String
+  buyerId   String
+  sellerId  String
+  listing   Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  buyer     User      @relation("BuyerConversations", fields: [buyerId], references: [id], onDelete: Cascade)
+  seller    User      @relation("SellerConversations", fields: [sellerId], references: [id], onDelete: Cascade)
+  messages  Message[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@unique([listingId, buyerId])
+  @@index([buyerId])
+  @@index([sellerId])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  conversationId String
+  senderId       String
+  content        String
+  readAt         DateTime?
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+
+  @@index([conversationId])
+}
