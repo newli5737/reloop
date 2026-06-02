@@ -91,7 +91,7 @@ async function main() {
       category: 'Thời trang',
       condition: 'GOOD' as const,
       location: 'Hà Nội',
-      images: ['https://images.unsplash.com/photo-1551028711-00167b16eac5?w=600'],
+      images: ['https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=600'],
       status: 'ACTIVE' as const,
       userId: seller.id,
     },
@@ -103,7 +103,7 @@ async function main() {
       category: 'Sách',
       condition: 'FAIR' as const,
       location: 'Hải Phòng',
-      images: ['https://images.unsplash.com/photo-1512820790801-4159cc8bbe4?w=600'],
+      images: ['https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=600'],
       status: 'ACTIVE' as const,
       userId: seller.id,
     },
@@ -115,7 +115,7 @@ async function main() {
       category: 'Đồ chơi',
       condition: 'GOOD' as const,
       location: 'TP. HCM',
-      images: ['https://images.unsplash.com/photo-1606814894317-20b3f7b0c7e8?w=600'],
+      images: ['https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=600'],
       status: 'ACTIVE' as const,
       userId: seller.id,
     },
@@ -127,7 +127,7 @@ async function main() {
       category: 'Xe cộ',
       condition: 'GOOD' as const,
       location: 'Cần Thơ',
-      images: ['https://images.unsplash.com/photo-1485965120180-e0995e1a4b57?w=600'],
+      images: ['https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=600'],
       status: 'ACTIVE' as const,
       userId: user.id,
     },
@@ -139,7 +139,7 @@ async function main() {
       category: 'Thể thao',
       condition: 'GOOD' as const,
       location: 'Đà Nẵng',
-      images: ['https://images.unsplash.com/photo-1626224583764-f87db74ac4ea?w=600'],
+      images: ['https://images.unsplash.com/photo-1721760886713-1ab0c5045bf7?w=600'],
       status: 'ACTIVE' as const,
       userId: seller.id,
     },
@@ -185,7 +185,12 @@ async function main() {
   for (const listing of sampleListings) {
     const existing = await prisma.listing.findFirst({ where: { title: listing.title } });
     if (existing) {
-      listings.push(existing);
+      listings.push(
+        await prisma.listing.update({
+          where: { id: existing.id },
+          data: { images: listing.images },
+        }),
+      );
     } else {
       listings.push(await prisma.listing.create({ data: listing }));
     }
