@@ -3,7 +3,7 @@ import { Plus } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useAuth } from '../context/AuthContext';
 
-const HIDDEN_PATHS = ['/admin', '/login', '/register'];
+const HIDDEN_PATHS = ['/admin', '/login', '/register', '/post'];
 
 export default function FloatPostButton() {
   const { user } = useAuth();

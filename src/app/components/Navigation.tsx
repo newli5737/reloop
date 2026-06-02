@@ -129,7 +129,7 @@ export default function Navigation() {
                           initial={{ opacity: 0, y: -10 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -10 }}
-                          className="absolute right-0 top-full mt-2 w-48 backdrop-blur-xl bg-navy/95 rounded-xl border-2 border-white/10 shadow-2xl overflow-hidden"
+                          className="absolute right-0 top-full mt-2 w-48 backdrop-blur-xl bg-navy/95 rounded-xl border-2 border-white/10 shadow-2xl overflow-hidden z-[60]"
                         >
                           <div className="p-3 border-b border-white/10">
                             <p className="font-semibold text-sm truncate">{user.name}</p>

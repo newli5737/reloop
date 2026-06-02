@@ -73,19 +73,11 @@ export default function Dashboard() {
     <div className="min-h-screen pt-32 px-6 pb-12">
       <div className="max-w-[1600px] mx-auto">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl md:text-5xl font-bold mb-2" style={{ fontFamily: 'var(--font-heading)' }}>
-                Dashboard
-              </h1>
-              <p className="text-slate-400">Quản lý tin đăng của bạn</p>
-            </div>
-            <Link
-              to="/post"
-              className="px-6 py-3 bg-gradient-to-r from-amber-500 to-amber-600 text-navy font-bold rounded-xl border-2 border-amber-400 shadow-lg hover:scale-105 transition-all"
-            >
-              + Đăng tin mới
-            </Link>
+          <div>
+            <h1 className="text-4xl md:text-5xl font-bold mb-2" style={{ fontFamily: 'var(--font-heading)' }}>
+              Dashboard
+            </h1>
+            <p className="text-slate-400">Quản lý tin đăng của bạn</p>
           </div>
         </motion.div>
 
@@ -118,10 +110,7 @@ export default function Dashboard() {
             <div className="text-center text-slate-400 py-12">Đang tải...</div>
           ) : listings.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-slate-400 mb-4">Bạn chưa có tin đăng nào</p>
-              <Link to="/post" className="text-emerald-400 hover:underline font-semibold">
-                Đăng tin đầu tiên →
-              </Link>
+              <p className="text-slate-400">Bạn chưa có tin đăng nào</p>
             </div>
           ) : (
             <div className="space-y-4">
