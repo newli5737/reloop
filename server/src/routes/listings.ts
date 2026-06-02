@@ -2,10 +2,14 @@ import { Router } from 'express';
 import { Condition, ListingStatus, Prisma } from '@prisma/client';
 import prisma from '../lib/prisma.js';
 import { authRequired } from '../middleware/auth.js';
+import { param } from '../lib/param.js';
 
 const router = Router();
 
 const sellerSelect = { id: true, name: true, email: true, phone: true, avatar: true, verificationStatus: true, createdAt: true };
+const sellerInclude = { user: { select: sellerSelect } } as const;
+
+type ListingWithSeller = Prisma.ListingGetPayload<{ include: typeof sellerInclude }>;
 
 const conditionLabels: Record<Condition, string> = {
   NEW: 'Như mới',
@@ -14,21 +18,7 @@ const conditionLabels: Record<Condition, string> = {
   POOR: 'Cần sửa chữa',
 };
 
-function formatListing(listing: {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  originalPrice: number | null;
-  category: string;
-  condition: Condition;
-  location: string;
-  images: string[];
-  status: ListingStatus;
-  views: number;
-  createdAt: Date;
-  user: { id: string; name: string; email: string; phone: string | null; avatar?: string | null; verificationStatus?: string; createdAt?: Date };
-}) {
+function formatListing(listing: ListingWithSeller) {
   return {
     ...listing,
     conditionLabel: conditionLabels[listing.condition],
@@ -67,7 +57,7 @@ router.get('/', async (req, res) => {
 
     const listings = await prisma.listing.findMany({
       where,
-      include: { user: { select: sellerSelect } },
+      include: sellerInclude,
       orderBy: { createdAt: 'desc' },
     });
 
@@ -81,7 +71,7 @@ router.get('/my', authRequired, async (req, res) => {
   try {
     const listings = await prisma.listing.findMany({
       where: { userId: req.user!.id },
-      include: { user: { select: sellerSelect } },
+      include: sellerInclude,
       orderBy: { createdAt: 'desc' },
     });
 
@@ -93,9 +83,10 @@ router.get('/my', authRequired, async (req, res) => {
 
 router.get('/:id', async (req, res) => {
   try {
+    const id = param(req.params.id);
     const listing = await prisma.listing.findUnique({
-      where: { id: req.params.id },
-      include: { user: { select: sellerSelect } },
+      where: { id },
+      include: sellerInclude,
     });
 
     if (!listing) {
@@ -150,7 +141,7 @@ router.post('/', authRequired, async (req, res) => {
         userId: req.user!.id,
         status: 'PENDING',
       },
-      include: { user: { select: sellerSelect } },
+      include: sellerInclude,
     });
 
     res.status(201).json(formatListing(listing));
@@ -161,7 +152,8 @@ router.post('/', authRequired, async (req, res) => {
 
 router.put('/:id', authRequired, async (req, res) => {
   try {
-    const listing = await prisma.listing.findUnique({ where: { id: req.params.id } });
+    const id = param(req.params.id);
+    const listing = await prisma.listing.findUnique({ where: { id } });
 
     if (!listing) {
       return res.status(404).json({ error: 'Không tìm thấy tin đăng' });
@@ -174,7 +166,7 @@ router.put('/:id', authRequired, async (req, res) => {
     const { title, description, price, originalPrice, category, condition, location, images, status } = req.body;
 
     const updated = await prisma.listing.update({
-      where: { id: req.params.id },
+      where: { id },
       data: {
         ...(title && { title }),
         ...(description && { description }),
@@ -187,7 +179,7 @@ router.put('/:id', authRequired, async (req, res) => {
         ...(status && req.user!.role === 'ADMIN' ? { status: status as ListingStatus } : {}),
         ...(status === 'SOLD' && listing.userId === req.user!.id ? { status: 'SOLD' as ListingStatus } : {}),
       },
-      include: { user: { select: sellerSelect } },
+      include: sellerInclude,
     });
 
     res.json(formatListing(updated));
@@ -198,7 +190,8 @@ router.put('/:id', authRequired, async (req, res) => {
 
 router.delete('/:id', authRequired, async (req, res) => {
   try {
-    const listing = await prisma.listing.findUnique({ where: { id: req.params.id } });
+    const id = param(req.params.id);
+    const listing = await prisma.listing.findUnique({ where: { id } });
 
     if (!listing) {
       return res.status(404).json({ error: 'Không tìm thấy tin đăng' });
@@ -208,7 +201,7 @@ router.delete('/:id', authRequired, async (req, res) => {
       return res.status(403).json({ error: 'Không có quyền xóa' });
     }
 
-    await prisma.listing.delete({ where: { id: req.params.id } });
+    await prisma.listing.delete({ where: { id } });
     res.json({ message: 'Đã xóa tin đăng' });
   } catch {
     res.status(500).json({ error: 'Lỗi server' });
